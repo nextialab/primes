@@ -13,16 +13,35 @@ var _col;
 var _val = 6;
 var _prime = false;
 var cursors;
-var primes = [2, 3, 5];
-var numbers = [2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 16, 18, 20];
+var primes = [2, 3, 5, 7];
+//var numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21];
+var vals = [
+    { val: 2,  prime: true,  acc: 0.1  },
+    { val: 3,  prime: true,  acc: 0.2  },
+    { val: 4,  prime: false, acc: 0.25 },
+    { val: 5,  prime: true,  acc: 0.35 },
+    { val: 6,  prime: false, acc: 0.4  },
+    { val: 7,  prime: true,  acc: 0.5  },
+    { val: 8,  prime: false, acc: 0.55 },
+    { val: 9,  prime: false, acc: 0.6  },
+    { val: 10, prime: false, acc: 0.65 },
+    { val: 12, prime: false, acc: 0.7  },
+    { val: 14, prime: false, acc: 0.75 },
+    { val: 15, prime: false, acc: 0.8  },
+    { val: 16, prime: false, acc: 0.85 },
+    { val: 18, prime: false, acc: 0.9  },
+    { val: 20, prime: false, acc: 0.95 },
+    { val: 21, prime: false, acc: 1.0  }
+]
 
 function generateNext() {
-    var nextIndex = Math.floor(Math.random() * numbers.length);
-    _val = numbers[nextIndex];
-    if (primes.indexOf(_val) != -1) {
-        _prime = true;
-    } else {
-        _prime = false;
+    var nextVal = Math.random();
+    for (var i = 0; i < vals.length; i++) {
+        if (nextVal < vals[i].acc) {
+            _val = vals[i].val;
+            _prime = vals[i].prime;
+            return;
+        }
     }
 }
 
@@ -57,31 +76,53 @@ function create() {
     cursors = game.input.keyboard.createCursorKeys();
     cursors.left.onDown.add(onLeft);
     cursors.right.onDown.add(onRight);
+    cursors.down.onDown.add(onDown);
     game.time.events.loop(500, updateDown, this);
 }
 
 function onLeft() {
     if (_col > 0) {
-        grid[_row][_col].value = 0;
-        grid[_row][_col].text.text = "";
-        grid[_row][_col].sprite.frame = _EMPTY;
-        _col--;
-        grid[_row][_col].value = _val;
-        grid[_row][_col].text.text = _val;
-        grid[_row][_col].sprite.frame = _prime ? _PRIME : _COMP;
+        // check if next col is empty
+        if (grid[_row][_col - 1].value == 0) {
+            grid[_row][_col].value = 0;
+            grid[_row][_col].text.text = "";
+            grid[_row][_col].sprite.frame = _EMPTY;
+            _col--;
+            grid[_row][_col].value = _val;
+            grid[_row][_col].text.text = _val;
+            grid[_row][_col].sprite.frame = _prime ? _PRIME : _COMP;
+        }
     }
 }
 
 function onRight() {
     if (_col < _COLS - 1) {
-        grid[_row][_col].value = 0;
-        grid[_row][_col].text.text = "";
-        grid[_row][_col].sprite.frame = _EMPTY;
-        _col++;
-        grid[_row][_col].value = _val;
-        grid[_row][_col].text.text = _val;
-        grid[_row][_col].sprite.frame = _prime ? _PRIME : _COMP;
+        // check if next col is empty
+        if (grid[_row][_col + 1].value == 0) {
+            grid[_row][_col].value = 0;
+            grid[_row][_col].text.text = "";
+            grid[_row][_col].sprite.frame = _EMPTY;
+            _col++;
+            grid[_row][_col].value = _val;
+            grid[_row][_col].text.text = _val;
+            grid[_row][_col].sprite.frame = _prime ? _PRIME : _COMP;
+        }
     }
+}
+
+function onDown() {
+    // look for floor
+    var row = _row;
+    while (row + 1 < _ROWS && grid[row + 1][_col].value == 0) {
+        row++;
+    }
+    grid[_row][_col].value = 0;
+    grid[_row][_col].text.text = "";
+    grid[_row][_col].sprite.frame = _EMPTY;
+    _row = row;
+    grid[_row][_col].value = _val;
+    grid[_row][_col].text.text = _val;
+    grid[_row][_col].sprite.frame = _prime ? _PRIME : _COMP;
 }
 
 function update() {
